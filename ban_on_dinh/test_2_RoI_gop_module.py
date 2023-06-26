@@ -156,7 +156,6 @@ def process_frame(img):
         cv2.destroyAllWindows()
     return a8, a8_0
 
-
 def check_roi_tu_arr(str_x, Y, top, bot):
     j = 1
     k = 0
@@ -452,51 +451,6 @@ def check_roi_tu_arr(str_x, Y, top, bot):
 
     return str_outout1, str_outout2
 
-
-def xu_ly_anh(img, array, Npixel):
-    x1 = array[0] #ok fix 480
-    y1 = array[1]
-    x2 = array[2]
-    y2 = array[3]
-
-    i=0
-    Pixels_Line = [] # sua duoc loi pixel line la bien public
-    
-
-    if y2 - y1 <0:
-        Pixels_Line = np.zeros((y1-y2+1),dtype = int)
-        for y in range(y1, y2-1,-1):
-            Pixels_Line[i] = img[y,x1]
-            i = i + 1
-
-    if y2 - y1 >0:
-        Pixels_Line = np.zeros((y2-y1+1),dtype = int)
-        for y in range(y1, y2+1,+1):
-            Pixels_Line[i] = img[y,x1] # sua dung pixel 480 and 50
-            i = i + 1
-
-
-            
-
-    N = len(Pixels_Line) 
-    # x_list = [int(i) for i in range(N)]
-    # Mang_input_waveform = np.zeros(N,dtype = float)
-
-    # for i in range(0,N):
-    #     Mang_input_waveform[i] = i/Npixel
-    print(f"len(Pixel_Line): {N}")
-    array_final = np.zeros(abs(y1-y2)+10, dtype = int)
-    i = j = k = 0
-    for k in range(0, N):
-        array_final[k] = -1
-    for i in range(0, N):
-        if i%Npixel == 0:
-            array_final[j] = Pixels_Line[i]
-            j = j + 1
-    # npixel_final = int(N/Npixel + 1)
-    # return N, Pixels_Line, array_final, N, Mang_input_waveform, x_list
-    return N, Pixels_Line, array_final, N
-
 def ve_roi(img, text, array, x):
     x1 = array[0]
     x2 = array[1]
@@ -516,6 +470,50 @@ def ve_roi(img, text, array, x):
     font = cv2.FONT_HERSHEY_SIMPLEX
     img = cv2.putText(img, text, (y1,y2), font, 1.5, (0,0,255),2,cv2.LINE_AA)
     return img
+
+def xu_ly_anh(img, array, Npixel):
+    x1 = array[0] #ok fix 480
+    y1 = array[1]
+    x2 = array[2]
+    y2 = array[3]
+
+    i=0
+    Pixels_Line = [] # sua duoc loi pixel line la bien public
+    
+
+    if y2 - y1 <0:
+        Pixels_Line = np.zeros((y1-y2+1),dtype = int)
+       
+        for y in range(y1, y2-1,-1):
+            Pixels_Line[i] = img[y,x1]
+            i = i + 1
+
+    if y2 - y1 >0:
+        Pixels_Line = np.zeros((y2-y1+1),dtype = int)
+        for y in range(y1, y2+1,+1):
+            Pixels_Line[i] = img[y,x1] # sua dung pixel 480 and 50
+            i = i + 1
+
+            
+
+    N = len(Pixels_Line) 
+    # x_list = [int(i) for i in range(N)]
+    # Mang_input_waveform = np.zeros(N,dtype = float)
+
+    # for i in range(0,N):
+    #     Mang_input_waveform[i] = i/Npixel
+    print(f"len(Pixel_Line): {N}")
+    array_final = np.zeros(abs(y1-y2)+10, dtype = int)
+    i = j = k = 0
+    for k in range(0, N):
+        array_final[k] = -1
+    for i in range(0, N):
+        if i%Npixel == 0:
+            array_final[j] = Pixels_Line[i]
+            j = j + 1
+    
+    # return N, Pixels_Line, array_final, N, Mang_input_waveform, x_list
+    return N, Pixels_Line, array_final, N
 
 def xu_ly_y(array2, values_y, row, threshold_code, input_var):
     values_x = [int(i) for i in range(len(values_y))] 
@@ -725,6 +723,6 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
     bin1 = bin1[0:digit]
     return threshold, so_mau, subarray, array_append, values_x, mang_so_sanh, daura4, maxfinal, bin1, so_hang_lay_duoc
 
-img = cv2.imread("C:\\Python\sample\\venv\\ban_on_dinh\\1. doc pixel\\test7_3_RoI.jpg")
+img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\test7.jpeg")
 led1, led2 = process_frame(img)
 print(f"led1: {led1} and led2: {led2}")

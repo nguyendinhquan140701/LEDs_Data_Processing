@@ -26,7 +26,7 @@ mang_so_1_append = []
 # while(True):
 
 array2 = [[0]] # TH khong can tinh xac suat
-img = cv2.imread("C:\\Python\sample\\venv\\ban_on_dinh\\1. doc pixel\\test7.jpeg")
+img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\test7.jpeg")
 # print(img)
 
 img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
@@ -38,7 +38,7 @@ height = frame.shape[0]
 width = frame.shape[1]
 # print("height, width", height, width)
 
-ret, frame0 = cv2.threshold(frame, 200, 255, cv2.THRESH_BINARY)
+ret, frame0 = cv2.threshold(frame, 100, 255, cv2.THRESH_BINARY)
 # cv2.imshow("Frame", frame0)
 contours, hierarchy = cv2.findContours(frame0, cv2.RETR_TREE , cv2.CHAIN_APPROX_SIMPLE)
 
@@ -567,21 +567,21 @@ else:
 
     # for i in range(0,N):
     #     Mang_input_waveform[i] = i/Npixel
-
-    array_final = np.zeros(abs(y2-y1)+10, dtype = int)
+    npixel_final = int(N/Npixel + 1)
+    array_final = np.zeros(npixel_final, dtype = int)
     i = j = k = 0
-    for k in range(0, N):
+    for k in range(0, npixel_final):
         array_final[k] = -1
-    for i in range(0, N):
+    for i in range(0, N, Npixel):
         if i%Npixel == 0:
             array_final[j] = Pixels_Line[i]
             j = j + 1
 
             
-    npixel_final = int(N/Npixel + 1)
+   
 
     c0 = array_final
-    print("gia tri pixel:", c0[100])
+    print("gia tri pixel:", c0[:])
     print("len mang xam: ", len(c0))
     print("len cac bit: ", npixel_final)
 
@@ -630,11 +630,11 @@ else:
     a_opt, b_opt, c_opt, d_opt = args
     y_model = mapping1(values_x, a_opt, b_opt, c_opt, d_opt)
     mse = mean_squared_error(values_y, y_model)
-    print(mse)
-    plt.scatter(values_x, values_y)
-    plt.plot(values_x, y_model, color = 'r')
-    plt.plot(values_x, values_y, color = 'blue')
-    plt.show()         
+    # print(mse)
+    # plt.scatter(values_x, values_y)
+    # plt.plot(values_x, y_model, color = 'r')
+    # plt.plot(values_x, values_y, color = 'blue')
+    # plt.show()         
 
     # len(values_y) là phụ thuộc người đặt khi khai báo array_final = np.zeros(500, dtype = int) ở trên
     # so sánh giá trị dự đoán: mse_y khi có optimal value(a0, a1, a2, a3) với giá trị thực tế: values_y
@@ -655,6 +655,7 @@ else:
     # chuyen sang 0; 1
     mang_so_sanh = [int(i) for i in range(len(values_y))] 
     so_sanh = 0
+
     for i in range(0,len(values_y)):
         if values_y[i] >= mse_y_values[i]:
             so_sanh = 1
@@ -662,6 +663,7 @@ else:
             so_sanh = 0
         mang_so_sanh[i] = so_sanh
     #end
+
 
     print(mang_so_sanh[:])
     #s
@@ -764,9 +766,10 @@ else:
     i = 0
     n = 0
     dem_n = 0
+    print(f"gia tri c: {c}")
     for k in range(0,20):
         x[k] = -1
-    for j in range(0, c-d+1):  # c = 500, d= 10
+    for j in range(0, c-5):  # c = 500, d= 10
         for m in range(0, d-input_var): # d-input_var = 10-4=6
             n = n + abs(a[j+m] - b[m])  # b = threshold_code
             # if abs(a[j+m] - b[m]) == 0 and n == 0:
@@ -774,10 +777,10 @@ else:
         if n == 0:
             # print(f"gia tri J: {j} va m: {m} va dem_n: {dem_n}")
             for o in range(0, input_var):
-                # print("i,j,d,o, trong1, trong2", i,j,d,o, i+o, j+d-input_var+o)
+                print("i,j,d,o, trong1, trong2", i,j,d,o, i+o, j+d-input_var+o)
                 if i + o < 20:  #ok fix xong 20. ctr chạy êm ru.
                     x[i + o] = a[j+d-input_var+o]
-                    
+                    print(f"x:{x}")
                 else:
                     pass
 
