@@ -10,20 +10,20 @@ from scipy.optimize import curve_fit
 import time
 
 
-# st = time.time()
+
 
 vid = cv2.VideoCapture(0)
 vid.set(cv2.CAP_PROP_EXPOSURE, -13)
-# # vid.set(3, 640)
-# # vid.set(4, 480)
+# vid.set(3, 640)
+# vid.set(4, 480)
 # array2 = [[0]]
 bien_nho_max = 0
 bien_nho_so_anh = 0
 mang_so_1 =[0]
 mang_so_1_append = []
-
+# img = np.frombuffer(frame, dtype=np.uint8).reshape(heigth, width, 4)
 while(True):
-
+    st = time.time()
     array2 = [[0]] # TH khong can tinh xac suat
     ret, img = vid.read()
     # print(img)
@@ -303,7 +303,6 @@ while(True):
         if str_[0] == j1:
             max1 = 0
             min1 = in1[0][3] # = bot
-
 
             # so sanh chay het cac gia tri của contour thỏa mãn ->  chay điểm đầu đến điểm cu
             for i2 in range(0, j1):
@@ -878,12 +877,12 @@ while(True):
         # frame2= cv2.putText(frame2, "So anh da xu ly:", (450,450),font, 0.7, (0,0,255),2,cv2.LINE_AA) #1: co chu 1 : khoang cach chu, 1 do day chu
         # frame2= cv2.putText(frame2, str(bien_nho_so_anh), (460,475),font, 0.7, (0,0,255),2,cv2.LINE_AA)
         
-        # et = time.time()
+        et = time.time()
  
-        # elapsed_time = round(et - st,2)
+        elapsed_time = round(et - st,2)
 
-        # frame2= cv2.putText(frame2, "Thoi gian (s):", (450, 385),font, 0.7, (0,0,255),2,cv2.LINE_AA) #1: co chu 1 : khoang cach chu, 1 do day chu
-        # frame2= cv2.putText(frame2, str(elapsed_time), (460,410),font, 0.7, (0,0,255),2,cv2.LINE_AA)
+        frame2= cv2.putText(frame2, "Thoi gian (s):", (450, 385),font, 0.7, (0,0,255),2,cv2.LINE_AA) #1: co chu 1 : khoang cach chu, 1 do day chu
+        frame2= cv2.putText(frame2, str(elapsed_time), (460,410),font, 0.7, (0,0,255),2,cv2.LINE_AA)
 
 
 
