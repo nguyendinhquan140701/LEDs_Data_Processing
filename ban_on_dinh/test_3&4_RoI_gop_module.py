@@ -14,9 +14,9 @@ def process_frame(img):
     # ret, img = vid.read()
     frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) #
 
-    blurred = cv2.GaussianBlur(frame, (7, 7), 0)
+    blurred = cv2.GaussianBlur(frame, (5, 5), 0)
 
-    select = frame[frame > 20]
+    select = frame[frame > 10]
     print(f"{select[:]}")
     avgValue = np.mean(select)
     print(f"avg pixel value: {avgValue}")
@@ -45,43 +45,89 @@ def process_frame(img):
         contours = contours[0:len(contours):7]
     if len(contours) >= 200 and len(contours)<300:
         contours = contours[0:len(contours):9]
-    if len(contours) >= 300 and len(contours)<500:
-        contours = contours[0:len(contours):10]
-    if len(contours) >= 500 and len(contours) < 700:
-            contours = contours[0:len(contours):15]
-    if len(contours) >= 700 and len(contours) < 1000:
-        contours = contours[0:len(contours):25]
-    if len(contours) >= 1000 and len(contours) < 1300:
-        contours = contours[0:len(contours):30]
+
     # print("lennnnnnn6",len(contours))
-    if len(contours) >= 1300 and len(contours) < 1800:
-        contours = contours[0:len(contours):40]
-    if len(contours) == 0 or len(contours) > 10000:
-            print("contour over")
-    print("len contours: ", len(contours))
-    mass_centres_x = []
-    mass_centres_y = []
-    top = []
-    bot = []
-    height = []
-
-    for i in range(0, len(contours)):
-        M = cv2.moments(contours[i], 0)
-        if M["m00"] != 0:
-            mass_centres_x.append(int(M['m10']/M['m00']))
-            mass_centres_y.append(int(M['m01']/M['m00']))
-        else:
-            mass_centres_x.append(int(0))
-            mass_centres_y.append(int(0))
-
-    for i in range(0, len(contours)):
-        x,y,w,h = cv2.boundingRect(contours[i])
-        cv2.rectangle(img,(x,y),(x+w,y+h),(0,0,255),2)
-        top.append(int(y))
-        bot.append(int(y+h))
-        height.append(int(h))
     
-    print(f'height:{height[:]}')
+    def before_sort_contour(contours_before):
+        print("len contours: ", len(contours_before))
+        before_mass_centres_x = []
+        before_mass_centres_y = []
+        before_top = []
+        before_bot = []
+        before_height = []
+
+        for i in range(0, len(contours_before)):
+            M = cv2.moments(contours_before[i], 0)
+            if M["m00"] != 0:
+                before_mass_centres_x.append(int(M['m10']/M['m00']))
+                before_mass_centres_y.append(int(M['m01']/M['m00']))
+            else:
+                before_mass_centres_x.append(int(0))
+                before_mass_centres_y.append(int(0))
+
+        for i in range(0, len(contours_before)):
+            before_x,before_y,before_w,before_h = cv2.boundingRect(contours_before[i])
+            # cv2.rectangle(img,(before_x,before_y),(before_x + before_w,before_y + before_h),(0,0,255),2)
+
+            before_top.append(int(before_y))
+            before_bot.append(int(before_y + before_h))
+            before_height.append(int(before_h))
+
+        sort_before_height = sorted(before_height, reverse=True)
+        Npixel = int(sort_before_height[0]/3 )
+
+        return Npixel
+    
+    def sorted_contours(final_contours):
+        mass_centres_x = []
+        mass_centres_y = []
+        top = []
+        bot = []
+
+        for i in range(0, len(final_contours)):
+            M = cv2.moments(final_contours[i], 0)
+            if M["m00"] != 0:
+                mass_centres_x.append(int(M['m10']/M['m00']))
+                mass_centres_y.append(int(M['m01']/M['m00']))
+            else:
+                mass_centres_x.append(int(0))
+                mass_centres_y.append(int(0))
+
+        for i in range(0, len(final_contours)):
+            x,y,w,h = cv2.boundingRect(final_contours[i])
+            # cv2.rectangle(img,(x,y),(x+w,y+h),(0,0,255),2)
+            top.append(int(y))
+            bot.append(int(y+h))
+        return top, bot, mass_centres_x, mass_centres_y
+    
+
+
+    Npixel = before_sort_contour(contours)    
+    sortedContours = []
+    print(f'Npixel:{Npixel}')
+
+    for i in range(0, len(contours)):
+        if cv2.contourArea(contours[i]) > 10*Npixel:
+            sortedContours.append(contours[i])
+        else:
+            pass
+    
+    final_contourArea = []
+    len_all_contours_final=[]
+    for i in range(0, len(sortedContours)):
+        final_contourArea.append(cv2.contourArea(sortedContours[i]))
+
+    print(f'contourArea_sort:{final_contourArea[:]}')
+    top, bot, mass_centres_x, mass_centres_y = sorted_contours(sortedContours)
+
+    print(f'top:{top} \nbot:{bot} \nx_centers: {mass_centres_x} \ny_centers: {mass_centres_y}\n')
+
+    # print(f'sort_height:{sort_height}')
+    # print(f'Npixel:{Npixel}')
+    # print(f'height:{height[:]}')
+
+    # frequency_map = Counter(height_final)
+
     if len(contours) == 0 or len(contours) > 70:
         pass
     else:
@@ -94,11 +140,10 @@ def process_frame(img):
         if len(bot) == 0:
             bot = np.zeros(5, dtype=int)
 
-        Npixel = 8
+        # Npixel = 8
         # Npixel = 12
         # Npixel = 11
         # Npixel = 4
-
 
         a, b, c, d, time_checkRoI = check_roi_tu_arr(mass_centres_x,mass_centres_y, top, bot, Npixel)
         # print(f"gia tri a[1] va a[3], hieu a[1] va a[3]: {a[1]} va {a[3]} va hieu:{abs(a[1] - a[3])}")
@@ -121,8 +166,8 @@ def process_frame(img):
 
         frame2, time_veRoi1 = ve_roi(img, text1, a, x)
         frame2, time_veRoi2 = ve_roi(img, text2, b, x)
-        frame2, time_veRoi3 = ve_roi(img, text3, c, x)
-        frame2, time_veRoi4 = ve_roi(img, text4, d, x)
+        # frame2, time_veRoi3 = ve_roi(img, text3, c, x)
+        # frame2, time_veRoi4 = ve_roi(img, text4, d, x)
 
         frame2 = img    
         
@@ -136,27 +181,27 @@ def process_frame(img):
 
         a0,b0,c0,d0, time_xuLyLine1 = xu_ly_anh(frame, array, Npixel)
         a0_0,b0_0,c0_0,d0_0, time_xuLyLine2 = xu_ly_anh(frame, array_0, Npixel)
-        a0_1,b0_1,c0_1,d0_1, time_xuLyLine3 = xu_ly_anh(frame, array_1, Npixel)
-        a0_2,b0_2,c0_2,d0_2, time_xuLyLine4 = xu_ly_anh(frame, array_2, Npixel)
+        # a0_1,b0_1,c0_1,d0_1, time_xuLyLine3 = xu_ly_anh(frame, array_1, Npixel)
+        # a0_2,b0_2,c0_2,d0_2, time_xuLyLine4 = xu_ly_anh(frame, array_2, Npixel)
         
         values_y = c0
         values_y_0 = c0_0
-        values_y_1 = c0_1
-        values_y_2 = c0_2
+        # values_y_1 = c0_1
+        # values_y_2 = c0_2
+
         row = 100
         threshold_code = [0,1,1,1,0,0,1,0,0,1]
         input_var = 4
 
-
         a00, a1, a2, a3, a9, time_xuLy_y1 = xu_ly_y(array2, values_y, row, threshold_code, input_var)
         a00_0, a1_0, a2_0, a3_0, a9_0, time_xuLy_y2= xu_ly_y(array2, values_y_0, row, threshold_code, input_var)
-        a00_1, a1_1, a2_1, a3_1, a9_1, time_xuLy_y3 = xu_ly_y(array2, values_y_1, row, threshold_code, input_var)
-        a00_2, a1_2, a2_2, a3_2, a9_2, time_xuLy_y4 = xu_ly_y(array2, values_y_2, row, threshold_code, input_var)
+        # a00_1, a1_1, a2_1, a3_1, a9_1, time_xuLy_y3 = xu_ly_y(array2, values_y_1, row, threshold_code, input_var)
+        # a00_2, a1_2, a2_2, a3_2, a9_2, time_xuLy_y4 = xu_ly_y(array2, values_y_2, row, threshold_code, input_var)
 
         print("data 1", a9)
         print("data 2", a9_0)
-        print("data 3", a9_1)
-        print("data 4", a9_2)
+        # print("data 3", a9_1)
+        # print("data 4", a9_2)
 
         frame2 = cv2.resize(frame2,(780,550))
         # height, width, channels = frame2.shape
@@ -166,14 +211,11 @@ def process_frame(img):
         total_time_00 = end_time_total - start_time_total
 
         # total_time_01 = time_checkRoI + time_veRoi1 + time_veRoi2 + time_veRoi3 + time_veRoi4 + time_xuLyLine1 + time_xuLyLine2 +time_xuLyLine3 + time_xuLyLine4 + time_xuLy_y1 + time_xuLy_y2 + time_xuLy_y3 + time_xuLy_y4
-
-        # print("total_time:", total_time_00)
- 
         cv2.imshow("Frame2", frame2) 
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    return a9, a9_0, a9_1, a9_2
-    # return a9_0
+    # return a9, a9_0, a9_1, a9_2
+    return a9, a9_0 
 
 def check_roi_tu_arr(str_x, Y, top, bot, Npixel):
     start_time1 = time.time()
@@ -425,7 +467,7 @@ def check_roi_tu_arr(str_x, Y, top, bot, Npixel):
         str_outout1[3] = min1 + 26*Npixel
 
         str_outout2[0] = (x_top + x_bot)/2
-        str_outout2[1] = max1 - 25*Npixel
+        str_outout2[1] = max1 - 26*Npixel
         str_outout2[2] = (x_top + x_bot)/2
         str_outout2[3] = max1 
         print(f"RoI 1.1: {str_outout1[:]}")
@@ -435,7 +477,7 @@ def check_roi_tu_arr(str_x, Y, top, bot, Npixel):
         str_outout1[0] = x_bot
         str_outout1[1] = min1 - 3*Npixel
         str_outout1[2] = x_bot
-        str_outout1[3] = min1 + 24*Npixel
+        str_outout1[3] = min1 + 25*Npixel
 
         str_outout2[0] = x_top 
         str_outout2[1] = max1 - 24*Npixel
@@ -447,12 +489,13 @@ def check_roi_tu_arr(str_x, Y, top, bot, Npixel):
     else:
         str_outout1[0] = (x_top + x_bot)/2
         str_outout1[1] = min1 - 3*Npixel
+        # str_outout1[1] = min1
         str_outout1[2] = (x_top + x_bot)/2
         str_outout1[3] = max1 + 3*Npixel
+        # str_outout1[3] = max1
 
     print(f"RoI 1.3: {str_outout1[:]}")
     print(f"RoI 2.3: {str_outout2[:]}")
-
 
     if str_[1] == j1 and j1 < str_[0] and str_[1] > 0:
         max2 = 0
@@ -467,8 +510,10 @@ def check_roi_tu_arr(str_x, Y, top, bot, Npixel):
         if any( x==0 for x in str_outout2):
             str_outout2[0] = (x_top2 + x_bot2)/2
             str_outout2[1] = min2 - 3*Npixel
+            str_outout2[1] = min2
             str_outout2[2] = (x_top2 + x_bot2)/2
             str_outout2[3] = max2 + 3*Npixel
+            str_outout2[3] = max2
         else:
             str_outout3[0] = (x_top2 + x_bot2)/2
             str_outout3[1] = min2 - 3*Npixel
@@ -489,8 +534,10 @@ def check_roi_tu_arr(str_x, Y, top, bot, Npixel):
         if any( x==0 for x in str_outout2):
             str_outout2[0] = (x_top2 + x_bot2)/2
             str_outout2[1] = min2 - 3*Npixel
+            # str_outout2[1] = min2
             str_outout2[2] = (x_top2 + x_bot2)/2
             str_outout2[3] = max2 + 3*Npixel
+            # str_outout2[3] = max2
         else:
             str_outout3[0] = (x_top2 + x_bot2)/2
             str_outout3[1] = min2 - 3*Npixel
@@ -837,6 +884,16 @@ def xu_ly_anh(img, array, Npixel):
             array_final[j] = Pixels_Line[i]
             j = j + 1
 
+    # array_final = np.zeros(N +4, dtype = int)
+    # for k in range(0, N):
+    #     array_final[k] = -1
+    # for i in range(0, N):
+    #     if i%Npixel == 0:
+    #         array_final[j] = Pixels_Line[i]
+    #         j = j + 1
+
+    print(f'value of array pixel:{array_final[:]}')
+
     end_time3 = time.time()
     total_time3 = end_time3 - start_time3
     # print(f"gia tri pixel:{array_final[:]}")
@@ -861,10 +918,10 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
     # print(f"args: {args}")
     a_opt, b_opt, c_opt, d_opt = args
     y_model = mapping1(values_x, a_opt, b_opt, c_opt, d_opt)
-    # plt.scatter(values_x, values_y)
-    # plt.plot(values_x, y_model, color = 'r')
-    # plt.plot(values_x, values_y, color = 'blue')
-    # plt.show()  
+    plt.scatter(values_x, values_y)
+    plt.plot(values_x, y_model, color = 'r')
+    plt.plot(values_x, values_y, color = 'blue')
+    plt.show()  
     mse_final = 0
     for i in range(0,len(values_y)):
         mse_y = args[0] + args[1]*i + args[2]*i**2 + args[3] * i**3
@@ -887,16 +944,10 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
 
     mang_2d_dau_vao = mang_so_sanh
     n_loop = 1
-
-    c = np.size(mang_2d_dau_vao)  # hàm trả về số cột của mang_2d_dau_vao and = 500
+    c = np.size(mang_2d_dau_vao)  
     d = np.size(threshold_code)
     b = threshold_code
-
-    MANG = np.zeros(20, dtype = int) #  column = 20
-    MANG_index = np.zeros(20, dtype = int)
-    MANG_test = np.zeros(20, dtype = int)
-    MANG_heso = np.zeros(20, dtype = int)
-    MANG_daura = np.zeros(n_loop, dtype = int) # sô phần tử = n_loop
+    MANG_daura = np.zeros(n_loop, dtype = int) 
 
     i = j = k = m = n = o = 0
     x = np.zeros(20, dtype = int) 
@@ -922,17 +973,14 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
         if n == 0:
             for o in range(0, input_var):
                 # print("i,j,d,o, trong1, trong2", i,j,d,o, i+o, j+d-input_var+o)
-                if i + o < 20:  #ok fix xong 20. ctr chạy êm ru.
+                if i + o < 20:  
                     x[i + o] = a[j+d-input_var+o]
                 else:
                     pass
-
             i = i + input_var
-
-           
         n = 0
 
-    # MANG[i_loop] = x
+  
     MANG = x
     print("gia tri mang x:",x)
     for k2 in range(0, sizeb):
@@ -966,11 +1014,6 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
             test[max1] = heso[m2]
             max1 = max1 + 1
 
-        
-    MANG_index = index
-    MANG_test = test
-    MANG_heso  = heso
-
     max1_3 = 0
     value3 = -1
     for i3 in range(0, size):
@@ -978,7 +1021,6 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
             max1_3 = index[i3]
             value3 = test[i3]
     daura = value3
-    # MANG_daura[i_loop] = daura 
     MANG_daura = daura 
 
     array = [input_var]*n_loop
@@ -996,14 +1038,10 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
 
     max1_4 = 0
     countdem4 = 0
-    # size4 = len(MANG_daura)
     size4 = 1
-
-    # for m4 in range(0, size4):
     count4 = 0
     countdem4 = 0
     for n4 in range(0, 20):
-        # if MANG_daura[m4] == test4[n4] or MANG_daura[m4] == -1:
         if MANG_daura == test4[n4] or MANG_daura == -1:
             count4 = 1
     if count4 != 1:
@@ -1052,7 +1090,6 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
     end_time4 = time.time()
     total_time4 = end_time4 - start_time4
 
-# return threshold, so_mau, subarray, array_append, values_x, mang_so_sanh, daura4, maxfinal, bin1, so_hang_lay_duoc
     return values_x, mang_so_sanh, daura4, maxfinal, bin1, total_time4
  
 
@@ -1060,7 +1097,6 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
 
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\40cm_test2.jpeg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\test7.jpeg")
-
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\Led_tach_RoI.jpeg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID-cheo3.jpeg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_4LED_10_07.jpg")
@@ -1070,7 +1106,8 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID-8bit.jpeg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LEDID_3_RoI.jpeg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_newphone.png")
-img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_02_2000Hz.jpg")
+# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_02_2000Hz.jpg")
+img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\GN2200\\9.jpg")
 
 
 
