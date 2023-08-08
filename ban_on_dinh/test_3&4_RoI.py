@@ -8,19 +8,17 @@ import time
 array2 = [[0]]
 # aa = 0
 def process_frame(img):
-# while(True):
+
     start_time_total = time.time()
-    img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)   
-    # ret, img = vid.read()
+    img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE) 
+
     frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) #
-
     blurred = cv2.GaussianBlur(frame, (5, 5), 0)
-
     select = frame[frame > 10]
     print(f"{select[:]}")
     avgValue = np.mean(select)
     print(f"avg pixel value: {avgValue}")
-    #    cv2.imshow("Frame", img) # raw
+
 
     height = frame.shape[0]
     width = frame.shape[1]  
@@ -100,8 +98,6 @@ def process_frame(img):
             bot.append(int(y+h))
         return top, bot, mass_centres_x, mass_centres_y
     
-
-
     Npixel = before_sort_contour(contours)    
     sortedContours = []
     print(f'Npixel:{Npixel}')
@@ -145,11 +141,10 @@ def process_frame(img):
         # Npixel = 11
         # Npixel = 4
 
-        a, b, c, d, time_checkRoI = check_roi_tu_arr(mass_centres_x,mass_centres_y, top, bot, Npixel)
-        # print(f"gia tri a[1] va a[3], hieu a[1] va a[3]: {a[1]} va {a[3]} va hieu:{abs(a[1] - a[3])}")
+        a, b, c, d, time_checkRoI = findRoi(mass_centres_x,mass_centres_y, top, bot, Npixel)
+        # print(f"value a[1] and a[3], sub a[1] and a[3]: {a[1]} and {a[3]} and sub:{abs(a[1] - a[3])}")
         if a[0] == a[1] == a[2] == a[3] ==0 or abs(a[1]-a[3]>=480) or a[1] == 480 or a[3] == 480:
             a = [0,0,0,103]
-            # print(a)
         if b[0] == b[1] == b[2] == b[3] ==0 or abs(b[1]-b[3]>=480) or b[1] == 480 or b[3] == 480:
             b = [0,0,0,103]
         if c[0] == c[1] == c[2] == c[3] ==0 or abs(c[1]-c[3]>=480) or c[1] == 480 or c[3] == 480:
@@ -164,10 +159,10 @@ def process_frame(img):
         text4 = 'RoI4'
         x = width
 
-        frame2, time_veRoi1 = ve_roi(img, text1, a, x)
-        frame2, time_veRoi2 = ve_roi(img, text2, b, x)
-        # frame2, time_veRoi3 = ve_roi(img, text3, c, x)
-        # frame2, time_veRoi4 = ve_roi(img, text4, d, x)
+        frame2, time_veRoi1 = drawRoi(img, text1, a, x)
+        frame2, time_veRoi2 = drawRoi(img, text2, b, x)
+        # frame2, time_veRoi3 = drawRoi(img, text3, c, x)
+        # frame2, time_veRoi4 = drawRoi(img, text4, d, x)
 
         frame2 = img    
         
@@ -179,10 +174,10 @@ def process_frame(img):
         array_1 = c
         array_2 = d
 
-        a0,b0,c0,d0, time_xuLyLine1 = xu_ly_anh(frame, array, Npixel)
-        a0_0,b0_0,c0_0,d0_0, time_xuLyLine2 = xu_ly_anh(frame, array_0, Npixel)
-        # a0_1,b0_1,c0_1,d0_1, time_xuLyLine3 = xu_ly_anh(frame, array_1, Npixel)
-        # a0_2,b0_2,c0_2,d0_2, time_xuLyLine4 = xu_ly_anh(frame, array_2, Npixel)
+        a0,b0,c0,d0, time_xuLyLine1 = preProcess(frame, array, Npixel)
+        a0_0,b0_0,c0_0,d0_0, time_xuLyLine2 = preProcess(frame, array_0, Npixel)
+        # a0_1,b0_1,c0_1,d0_1, time_xuLyLine3 = preProcess(frame, array_1, Npixel)
+        # a0_2,b0_2,c0_2,d0_2, time_xuLyLine4 = preProcess(frame, array_2, Npixel)
         
         values_y = c0
         values_y_0 = c0_0
@@ -193,10 +188,10 @@ def process_frame(img):
         threshold_code = [0,1,1,1,0,0,1,0,0,1]
         input_var = 4
 
-        a00, a1, a2, a3, a9, time_xuLy_y1 = xu_ly_y(array2, values_y, row, threshold_code, input_var)
-        a00_0, a1_0, a2_0, a3_0, a9_0, time_xuLy_y2= xu_ly_y(array2, values_y_0, row, threshold_code, input_var)
-        # a00_1, a1_1, a2_1, a3_1, a9_1, time_xuLy_y3 = xu_ly_y(array2, values_y_1, row, threshold_code, input_var)
-        # a00_2, a1_2, a2_2, a3_2, a9_2, time_xuLy_y4 = xu_ly_y(array2, values_y_2, row, threshold_code, input_var)
+        a00, a1, a2, a3, a9, time_xuLy_y1 = processBin(array2, values_y, row, threshold_code, input_var)
+        a00_0, a1_0, a2_0, a3_0, a9_0, time_xuLy_y2= processBin(array2, values_y_0, row, threshold_code, input_var)
+        # a00_1, a1_1, a2_1, a3_1, a9_1, time_xuLy_y3 = processBin(array2, values_y_1, row, threshold_code, input_var)
+        # a00_2, a1_2, a2_2, a3_2, a9_2, time_xuLy_y4 = processBin(array2, values_y_2, row, threshold_code, input_var)
 
         print("data 1", a9)
         print("data 2", a9_0)
@@ -217,7 +212,7 @@ def process_frame(img):
     # return a9, a9_0, a9_1, a9_2
     return a9, a9_0 
 
-def check_roi_tu_arr(str_x, Y, top, bot, Npixel):
+def findRoi(str_x, Y, top, bot, Npixel):
     start_time1 = time.time()
     j = 1
     k = 0
@@ -823,7 +818,7 @@ def check_roi_tu_arr(str_x, Y, top, bot, Npixel):
     total_time1 =end_time1 - start_time1
     return str_outout1, str_outout2, str_outout3, str_outout4, total_time1
 
-def ve_roi(img, text, array, x):
+def drawRoi(img, text, array, x):
     start_time2 = time.time()
     x1 = array[0]
     x2 = array[1]
@@ -846,7 +841,7 @@ def ve_roi(img, text, array, x):
     total_time2 =  end_time2 - start_time2
     return img, total_time2
 
-def xu_ly_anh(img, array, Npixel):
+def preProcess(img, array, Npixel):
     start_time3 = time.time()
 
     x1 = array[0] #ok fix 480
@@ -899,7 +894,7 @@ def xu_ly_anh(img, array, Npixel):
     # print(f"gia tri pixel:{array_final[:]}")
     return N, Pixels_Line, array_final, N, total_time3
 
-def xu_ly_y(array2, values_y, row, threshold_code, input_var):
+def processBin(array2, values_y, row, threshold_code, input_var):
 
     start_time4 = time.time()
 # values_x = [int(i) for i in range(len(values_y))]  # nếu không dùng để show curve fit mapping vì không hỗ trợ kiểu List, phải chuyển sang kiểu array
@@ -979,7 +974,6 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
                     pass
             i = i + input_var
         n = 0
-
   
     MANG = x
     print("gia tri mang x:",x)
@@ -1025,10 +1019,8 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
 
     array = [input_var]*n_loop
     size4 = np.size(MANG_daura)
-
     test4 = np.zeros(20, dtype = int)
     index4 = np.zeros(20, dtype = int)
-
     count4 = countdem4 = max1_4 = max2_4 = daura4 = value4 = 0
     max3_4 = maxfinal = index3_4 = indexfinal = 0
 
@@ -1068,10 +1060,9 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
         daura4 = 100*max3_4/size4
         indexfinal = index3_4
         maxfinal = max3_4 
-
     
     digit =  4
-    def twosCom_decBin(dec, digit):
+    def dataOut(dec, digit):
         bin1 = ""
         if dec>=0:
             bin1 = bin(dec).split("0b")[1]
@@ -1082,7 +1073,7 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
             bin1 = -1*dec
             return bin(bin1-pow(2,digit)).split("0b")[1]
     print("value4:", value4)
-    bin1 = twosCom_decBin(value4, 32) 
+    bin1 = dataOut(value4, 32) 
     bin1 = str(bin1)[::-1] 
     bin1 = [int(i) for i in str(bin1)] 
     bin1 = bin1[0:digit]
@@ -1093,7 +1084,6 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
     return values_x, mang_so_sanh, daura4, maxfinal, bin1, total_time4
  
 
- 
 
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\40cm_test2.jpeg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\test7.jpeg")
