@@ -20,8 +20,8 @@ def threshold(img):
 
     # ret, imgBinary = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     ret, imgBinary = cv2.threshold(blurred, avgValue, 255,cv2.THRESH_BINARY)
-    # thresh = cv2.adaptiveThreshold(frame, 255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 25, 5)
-    print(f"ret:{ret}")
+    # imgBinary = cv2.adaptiveThreshold(frame, 255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 41, 15)
+    # print(f"ret:{ret}")
     contours, hierachy = cv2.findContours(imgBinary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     
     height = []
@@ -32,8 +32,8 @@ def threshold(img):
     len_all_contours = []
     # print(f'contours:{contours[0]} ')
 
-    print(f'before_contour_sort:{before_contours_sort[0:13]}')
-    print(f'len_all_contours:{len_all_contours[:]}')
+    # print(f'before_contour_sort:{before_contours_sort[0:13]}')
+    # print(f'len_all_contours:{len_all_contours[:]}')
 
     for i in range (0, len(contours)):
         x,y,w,h = cv2.boundingRect(contours[i])
@@ -86,16 +86,16 @@ def threshold(img):
     most_frequent_value = sorted_frequency_map[most_frequent_key]
     print(f"Key có value lớn nhất: {most_frequent_key}, với tần suất xuất hiện: {most_frequent_value}")
 
-    # imgContour = cv2.drawContours(img1, contours_final[:],-1, (0,0,255), 2)
+    imgContour = cv2.drawContours(img1, contours_final[:],-1, (0,0,255), 2)
 
     # sortHeight = sorted(h)
-    # print(f'ret:{ret}') 
+    print(f'ret:{ret}') 
 
 
     # cv2.imwrite('blur_image.png', imgBinary)
     cv2.imwrite('grey_image.png', imgBinary)
     plt.show()
-    imgShow = cv2.resize(img1, (780,550))
+    imgShow = cv2.resize(imgBinary, (780,550))
 
     # cv2.imshow("image", imgBinary)
     # cv2.imshow("image", img)
@@ -115,6 +115,8 @@ img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\test7.jpeg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID-GN2200_4000Hz.jpg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\GN2200\\6.jpg")
+# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\zoom_pixel4.jpg")
+
 
 
 

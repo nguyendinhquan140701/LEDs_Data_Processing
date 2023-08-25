@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import math as goc_lech
 import time
+from PIL import Image
 
 array2 = [[0]]
 # aa = 0
@@ -11,10 +12,13 @@ def process_frame(img):
 
     start_time_total = time.time()
     img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE) 
+    print(f'img value:{img[0:50]}')
+    img = cv2.resize(img, (1080,720))
+    # img = np.array(new_im)
 
     frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) #
-    blurred = cv2.GaussianBlur(frame, (5, 5), 0)
-    select = frame[frame > 10]
+    blurred = cv2.blur(frame, (5, 5), 0)
+    select = frame[frame > 5]
     print(f"{select[:]}")
     avgValue = np.mean(select)
     print(f"avg pixel value: {avgValue}")
@@ -198,7 +202,7 @@ def process_frame(img):
         # print("data 3", a9_1)
         # print("data 4", a9_2)
 
-        frame2 = cv2.resize(frame2,(780,550))
+        frame2 = cv2.resize(frame2,(1080,720))
         # height, width, channels = frame2.shape
         # print(f"height, width:{height, width}")
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -483,11 +487,11 @@ def findRoi(str_x, Y, top, bot, Npixel):
 
     else:
         str_outout1[0] = (x_top + x_bot)/2
-        str_outout1[1] = min1 - 3*Npixel
-        # str_outout1[1] = min1
+        # str_outout1[1] = min1 - 3*Npixel
+        str_outout1[1] = min1
         str_outout1[2] = (x_top + x_bot)/2
-        str_outout1[3] = max1 + 3*Npixel
-        # str_outout1[3] = max1
+        # str_outout1[3] = max1 + 3*Npixel
+        str_outout1[3] = max1
 
     print(f"RoI 1.3: {str_outout1[:]}")
     print(f"RoI 2.3: {str_outout2[:]}")
@@ -528,11 +532,11 @@ def findRoi(str_x, Y, top, bot, Npixel):
                 x_bot2 = in2[i3][0]
         if any( x==0 for x in str_outout2):
             str_outout2[0] = (x_top2 + x_bot2)/2
-            str_outout2[1] = min2 - 3*Npixel
-            # str_outout2[1] = min2
+            # str_outout2[1] = min2 - 3*Npixel
+            str_outout2[1] = min2
             str_outout2[2] = (x_top2 + x_bot2)/2
-            str_outout2[3] = max2 + 3*Npixel
-            # str_outout2[3] = max2
+            # str_outout2[3] = max2 + 3*Npixel
+            str_outout2[3] = max2
         else:
             str_outout3[0] = (x_top2 + x_bot2)/2
             str_outout3[1] = min2 - 3*Npixel
@@ -833,9 +837,9 @@ def drawRoi(img, text, array, x):
     else:
         y1 = 5 + x3
 
-    img = cv2.line(img,(x1,x2),(x3,x4),(0,0,255),1,cv2.LINE_AA)
+    img = cv2.line(img,(x1,x2),(x3,x4),(0,0,255),3,cv2.LINE_AA)
     font = cv2.FONT_HERSHEY_SIMPLEX
-    img = cv2.putText(img, text, (y1,y2), font, 1.5, (0,0,255),2,cv2.LINE_AA)
+    img = cv2.putText(img, text, (y1,y2), font, 3, (0,0,255),2,cv2.LINE_AA)
 
     end_time2 = time.time()
     total_time2 =  end_time2 - start_time2
@@ -870,8 +874,9 @@ def preProcess(img, array, Npixel):
     N = len(Pixels_Line) 
 
     npixel_final = int(N/Npixel + 4)
-    array_final = np.zeros(npixel_final, dtype = int)
     i = j = k = 0
+
+    array_final = np.zeros(npixel_final, dtype = int)
     for k in range(0, npixel_final):
         array_final[k] = -1
     for i in range(0, N, Npixel):
@@ -879,7 +884,7 @@ def preProcess(img, array, Npixel):
             array_final[j] = Pixels_Line[i]
             j = j + 1
 
-    # array_final = np.zeros(N +4, dtype = int)
+    # array_final = np.zeros(N, dtype = int)
     # for k in range(0, N):
     #     array_final[k] = -1
     # for i in range(0, N):
@@ -1097,7 +1102,10 @@ def processBin(array2, values_y, row, threshold_code, input_var):
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LEDID_3_RoI.jpeg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_newphone.png")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_02_2000Hz.jpg")
-img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\GN2200\\9.jpg")
+# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\GN2200\\9.jpg")
+# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\Led_long_cheo2.jpg")
+img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\zoom_pixel4.jpg")
+
 
 
 
