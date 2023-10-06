@@ -854,7 +854,7 @@ def preProcess(img, array, Npixel):
     y2 = array[3]
     # print(f"array:{array[:]}")
     i=0
-    Pixels_Line = [] # sua duoc loi pixel line la bien public
+    # Pixels_Line = [] # sua duoc loi pixel line la bien public
 
     if y2 - y1 <0:
         Pixels_Line = np.zeros((y1-y2+1),dtype = int)
@@ -870,8 +870,11 @@ def preProcess(img, array, Npixel):
             i = i + 1
 
     # print(f"gia tri pixel:{Pixels_Line[:]}")        
-
+    # indices_to_remove = np.arange(0, int(Npixel/2))
+    # new_Pixels_Line = np.delete(Pixels_Line, indices_to_remove)
+    # N = len(new_Pixels_Line) 
     N = len(Pixels_Line) 
+
 
     npixel_final = int(N/Npixel + 4)
     i = j = k = 0
