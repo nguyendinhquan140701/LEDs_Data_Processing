@@ -114,7 +114,7 @@ while(True):
         array = a
 
 
-        a0,b0,c0,d0,e0,f0 = hxla.xu_ly_anh(frame, array, Npixel)
+        a0,b0,c0,d0 = hxla.xu_ly_anh(frame, array, Npixel)
 
 #        print("Kich thuoc cua line", a0)
 #        plt.plot(f0, b0) 
@@ -227,8 +227,8 @@ while(True):
 
 #        print('time', elapsed_time)
 
-vid.release()
-cv2.destroyAllWindows()
+    vid.release()
+    cv2.destroyAllWindows()
 
 #--------------------------------------------------
 # xóa comment thừa ok

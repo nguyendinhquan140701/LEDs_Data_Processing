@@ -2,18 +2,26 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-import math as goc_lech
+import math
 import time
 from PIL import Image
+import imutils
 
 array2 = [[0]]
 # aa = 0
+
 def process_frame(img):
 
     start_time_total = time.time()
-    img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE) 
-    print(f'img value:{img[0:50]}')
-    img = cv2.resize(img, (1080,720))
+    # img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE) 
+    img = cv2.rotate(img, cv2.ROTATE_180) 
+    # img = img
+
+    height = img.shape[0]
+    width = img.shape[1]  
+    print("height, width", height, width)
+    # print(f'img value:{img[0:50]}')
+    # img = cv2.resize(img, (700,500))
     # img = np.array(new_im)
 
     frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) #
@@ -24,12 +32,12 @@ def process_frame(img):
     print(f"avg pixel value: {avgValue}")
 
 
-    height = frame.shape[0]
-    width = frame.shape[1]  
-    #     print("height, width", height, width)
-
+    # height = frame.shape[0]
+    # width = frame.shape[1]  
+    # print("height, width", height, width)
+  
     ret, frame0 = cv2.threshold(blurred, avgValue, 255, cv2.THRESH_BINARY)
-
+    # ret, frame0 = cv2.threshold(blurred, 150, 255, cv2.THRESH_BINARY)
     # ret, frame0 = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     print(f'ret:{ret}')
     contours, hierarchy = cv2.findContours(frame0, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -54,8 +62,8 @@ def process_frame(img):
         print("len contours: ", len(contours_before))
         before_mass_centres_x = []
         before_mass_centres_y = []
-        before_top = []
-        before_bot = []
+        # before_top = []
+        # before_bot = []
         before_height = []
 
         for i in range(0, len(contours_before)):
@@ -69,14 +77,15 @@ def process_frame(img):
 
         for i in range(0, len(contours_before)):
             before_x,before_y,before_w,before_h = cv2.boundingRect(contours_before[i])
-            # cv2.rectangle(img,(before_x,before_y),(before_x + before_w,before_y + before_h),(0,0,255),2)
+            cv2.rectangle(img,(before_x,before_y),(before_x + before_w,before_y + before_h),(0,0,255),2)
 
-            before_top.append(int(before_y))
-            before_bot.append(int(before_y + before_h))
+            # before_top.append(int(before_y))
+            # before_bot.append(int(before_y + before_h))
             before_height.append(int(before_h))
 
-        sort_before_height = sorted(before_height, reverse=True)
-        Npixel = int(sort_before_height[0]/3 )
+        sort_height = sorted(before_height, reverse=True)
+        print(f"height: {sort_height[:]}")
+        Npixel = int(sort_height[0]/3 )
 
         return Npixel
     
@@ -86,7 +95,7 @@ def process_frame(img):
         top = []
         bot = []
 
-        for i in range(0, len(final_contours)):
+        for i in range(2, len(final_contours)-2):
             M = cv2.moments(final_contours[i], 0)
             if M["m00"] != 0:
                 mass_centres_x.append(int(M['m10']/M['m00']))
@@ -95,9 +104,10 @@ def process_frame(img):
                 mass_centres_x.append(int(0))
                 mass_centres_y.append(int(0))
 
-        for i in range(0, len(final_contours)):
+        for i in range(2, len(final_contours)-2):
             x,y,w,h = cv2.boundingRect(final_contours[i])
             # cv2.rectangle(img,(x,y),(x+w,y+h),(0,0,255),2)
+            # cv2.drawContours(img, final_contours[:], -1, (0,255,0), 2)
             top.append(int(y))
             bot.append(int(y+h))
         return top, bot, mass_centres_x, mass_centres_y
@@ -106,6 +116,7 @@ def process_frame(img):
     sortedContours = []
     print(f'Npixel:{Npixel}')
 
+
     for i in range(0, len(contours)):
         if cv2.contourArea(contours[i]) > 10*Npixel:
             sortedContours.append(contours[i])
@@ -113,12 +124,12 @@ def process_frame(img):
             pass
     
     final_contourArea = []
-    len_all_contours_final=[]
     for i in range(0, len(sortedContours)):
         final_contourArea.append(cv2.contourArea(sortedContours[i]))
 
-    print(f'contourArea_sort:{final_contourArea[:]}')
+    # print(f'contourArea_sort:{final_contourArea[:]}')
     top, bot, mass_centres_x, mass_centres_y = sorted_contours(sortedContours)
+
 
     print(f'top:{top} \nbot:{bot} \nx_centers: {mass_centres_x} \ny_centers: {mass_centres_y}\n')
 
@@ -147,13 +158,13 @@ def process_frame(img):
 
         a, b, c, d, time_checkRoI = findRoi(mass_centres_x,mass_centres_y, top, bot, Npixel)
         # print(f"value a[1] and a[3], sub a[1] and a[3]: {a[1]} and {a[3]} and sub:{abs(a[1] - a[3])}")
-        if a[0] == a[1] == a[2] == a[3] ==0 or abs(a[1]-a[3]>=480) or a[1] == 480 or a[3] == 480:
+        if a[0] == a[1] == a[2] == a[3] ==0 or abs(a[1]-a[3]>=324) or a[1] == 324 or a[3] == 324:
             a = [0,0,0,103]
-        if b[0] == b[1] == b[2] == b[3] ==0 or abs(b[1]-b[3]>=480) or b[1] == 480 or b[3] == 480:
+        if b[0] == b[1] == b[2] == b[3] ==0 or abs(b[1]-b[3]>=324) or b[1] == 324 or b[3] == 324:
             b = [0,0,0,103]
-        if c[0] == c[1] == c[2] == c[3] ==0 or abs(c[1]-c[3]>=480) or c[1] == 480 or c[3] == 480:
+        if c[0] == c[1] == c[2] == c[3] ==0 or abs(c[1]-c[3]>=324) or c[1] == 324 or c[3] == 324:
             c = [0,0,0,103]
-        if d[0] == d[1] == d[2] == d[3] ==0 or abs(d[1]-d[3]>=480) or d[1] == 480 or d[3] == 480:
+        if d[0] == d[1] == d[2] == d[3] ==0 or abs(d[1]-d[3]>=324) or d[1] == 324 or d[3] == 324:
             d = [0,0,0,103]
         print(f"roi1: {a}, roi2: {b}, roi3: {c}, roi4: {d}")
 
@@ -165,8 +176,8 @@ def process_frame(img):
 
         frame2, time_veRoi1 = drawRoi(img, text1, a, x)
         frame2, time_veRoi2 = drawRoi(img, text2, b, x)
-        # frame2, time_veRoi3 = drawRoi(img, text3, c, x)
-        # frame2, time_veRoi4 = drawRoi(img, text4, d, x)
+        frame2, time_veRoi3 = drawRoi(img, text3, c, x)
+        frame2, time_veRoi4 = drawRoi(img, text4, d, x)
 
         frame2 = img    
         
@@ -179,12 +190,12 @@ def process_frame(img):
         array_2 = d
 
         a0,b0,c0,d0, time_xuLyLine1 = preProcess(frame, array, Npixel)
-        a0_0,b0_0,c0_0,d0_0, time_xuLyLine2 = preProcess(frame, array_0, Npixel)
+        # a0_0,b0_0,c0_0,d0_0, time_xuLyLine2 = preProcess(frame, array_0, Npixel)
         # a0_1,b0_1,c0_1,d0_1, time_xuLyLine3 = preProcess(frame, array_1, Npixel)
         # a0_2,b0_2,c0_2,d0_2, time_xuLyLine4 = preProcess(frame, array_2, Npixel)
         
         values_y = c0
-        values_y_0 = c0_0
+        # values_y_0 = c0_0
         # values_y_1 = c0_1
         # values_y_2 = c0_2
 
@@ -193,12 +204,12 @@ def process_frame(img):
         input_var = 4
 
         a00, a1, a2, a3, a9, time_xuLy_y1 = processBin(array2, values_y, row, threshold_code, input_var)
-        a00_0, a1_0, a2_0, a3_0, a9_0, time_xuLy_y2= processBin(array2, values_y_0, row, threshold_code, input_var)
+        # a00_0, a1_0, a2_0, a3_0, a9_0, time_xuLy_y2= processBin(array2, values_y_0, row, threshold_code, input_var)
         # a00_1, a1_1, a2_1, a3_1, a9_1, time_xuLy_y3 = processBin(array2, values_y_1, row, threshold_code, input_var)
         # a00_2, a1_2, a2_2, a3_2, a9_2, time_xuLy_y4 = processBin(array2, values_y_2, row, threshold_code, input_var)
 
         print("data 1", a9)
-        print("data 2", a9_0)
+        # print("data 2", a9_0)
         # print("data 3", a9_1)
         # print("data 4", a9_2)
 
@@ -214,7 +225,86 @@ def process_frame(img):
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     # return a9, a9_0, a9_1, a9_2
-    return a9, a9_0 
+    return a9
+
+def before_process_frame(img):
+    img1 = imutils.rotate(img, -90)
+    # plt.imshow(img1)
+    # plt.show()
+
+    image = img1
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# convert to binary image by thresholding it
+    ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV +
+                        cv2.THRESH_OTSU)
+# show thresholded image
+    # plt.imshow(thresh)
+    # plt.show()
+
+# crop 20% of the image from top and bottom
+    y = int(image.shape[0] * 0.2)
+    x = int(image.shape[1] * 0)
+    crop_img = thresh[y:image.shape[0] - y, x:image.shape[1] - x]
+    # show cropped image
+    # plt.imshow(crop_img)
+    # plt.show()
+
+    #find edges in the image using canny edge detection method
+    edges = cv2.Canny(crop_img, 20, 10)
+    # show result
+    # plt.imshow(edges)
+    # plt.show()
+
+    # find lines in the image using hough transform technique
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 30, maxLineGap=100)
+    # draw lines on the image
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        cv2.line(crop_img, (x1, y1), (x2, y2), (255, 0, 0), 3)
+    # show result
+    # plt.imshow(crop_img)
+    # plt.show()
+
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength=70, maxLineGap=100)
+
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        theta = math.atan2(y2 - y1, x2 - x1) * 180.0 / math.pi
+        # print(f"Line: ({x1}, {y1}), ({x2}, {y2}), Angle: {theta}")
+
+    most_dict = {}
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        theta = int(math.atan2(y2 - y1, x2 - x1) * 180.0 / math.pi)
+        if theta == 0:
+            continue
+        if len(list(most_dict.keys())) == 0:
+            most_dict[theta] = 1
+        for k in list(most_dict.keys()):
+                if abs(theta - k) < 10:
+                    most_dict[k] += 1
+                if abs(theta - k) > 10:
+                    most_dict[theta] = 1
+    most_dict = sorted(most_dict.items(), key=lambda x: x[1], reverse=True)[:2]
+
+    # get 1st angle
+    theta1 = most_dict[0][0]
+
+    # %%
+    if theta1 > 0:
+        src_pts = []
+    else:
+        _theta1 = abs(theta1)
+        _theta1 = _theta1 * math.pi / 180
+        src_pts = np.float32([[10+int(10/math.tan(_theta1)), 10], [50+int(10/math.tan(_theta1)), 10], [10, 20], [50, 20]])
+    dst_pts = np.float32([[10, 10], [50, 10], [10, 20], [50, 20]])
+
+    matrix = cv2.getPerspectiveTransform(src_pts, dst_pts)
+    # Apply the transformation
+    warped_img = cv2.warpPerspective(image, matrix, (crop_img.shape[1]*2, crop_img.shape[0]*2))
+    # show result
+    return warped_img
+
 
 def findRoi(str_x, Y, top, bot, Npixel):
     start_time1 = time.time()
@@ -229,6 +319,8 @@ def findRoi(str_x, Y, top, bot, Npixel):
     str_out6 = np.zeros((70, 4), dtype = int)
     str_out7 = np.zeros((70, 4), dtype = int)
     str_out8 = np.zeros((70, 4), dtype = int)
+
+    # print(f'npixel:{Npixel}') 
 
     n = len(str_x)
 
@@ -439,7 +531,7 @@ def findRoi(str_x, Y, top, bot, Npixel):
         str_outout1[2] = (x_top + x_bot)/2
         str_outout1[3] = max1
 
-    elif str_[0] == j4 and (j4 != j1 or j4 != j2 or j4 != j3 ):
+    elif str_[0] == j4 and (j4 != j1 or j4 != j2 or j4 != j3):
         max1 = 0
         min1 = in4[0][3]
         for i2 in range(0, j4):
@@ -455,35 +547,36 @@ def findRoi(str_x, Y, top, bot, Npixel):
         str_outout1[3] = max1
 
     # truong hop co den so 2
-    goclech1 = goc_lech.degrees(goc_lech.atan2(abs(x_top - x_bot),abs(max1 - min1)))
+    goclech1 = math.degrees(math.atan2(abs(x_top - x_bot),abs(max1 - min1)))
     print(f"goc lech RoI 1:{goclech1}")
     print(f"RoI goc:{str_outout1}")
     print(f"max1 = {max1} and min1 = {min1}")
     if abs(max1 - min1) >= 45*Npixel and goclech1 <= 2 and max1 > 0:
-        str_outout1[0] = (x_top + x_bot)/2
-        str_outout1[1] = min1 - 3*Npixel
-        str_outout1[2] = (x_top + x_bot)/2
-        str_outout1[3] = min1 + 26*Npixel
+        pass
+    #     str_outout1[0] = (x_top + x_bot)/2
+    #     str_outout1[1] = min1 - 3*Npixel
+    #     str_outout1[2] = (x_top + x_bot)/2
+    #     str_outout1[3] = min1 + 26*Npixel
 
-        str_outout2[0] = (x_top + x_bot)/2
-        str_outout2[1] = max1 - 26*Npixel
-        str_outout2[2] = (x_top + x_bot)/2
-        str_outout2[3] = max1 
-        print(f"RoI 1.1: {str_outout1[:]}")
-        print(f"RoI 2.1: {str_outout2[:]}")
+    #     str_outout2[0] = (x_top + x_bot)/2
+    #     str_outout2[1] = max1 - 26*Npixel
+    #     str_outout2[2] = (x_top + x_bot)/2
+    #     str_outout2[3] = max1 
+    #     print(f"RoI 1.1: {str_outout1[:]}")
+    #     print(f"RoI 2.1: {str_outout2[:]}")
 
-    elif abs(max1 - min1) >= 45*Npixel and goclech1 > 2 and max1 > 0:
-        str_outout1[0] = x_bot
-        str_outout1[1] = min1 - 3*Npixel
-        str_outout1[2] = x_bot
-        str_outout1[3] = min1 + 25*Npixel
+    # elif abs(max1 - min1) >= 45*Npixel and goclech1 > 2 and max1 > 0:
+    #     str_outout1[0] = x_bot
+    #     str_outout1[1] = min1 - 3*Npixel
+    #     str_outout1[2] = x_bot
+    #     str_outout1[3] = min1 + 25*Npixel
 
-        str_outout2[0] = x_top 
-        str_outout2[1] = max1 - 24*Npixel
-        str_outout2[2] = x_top
-        str_outout2[3] = max1 
-        print(f"RoI 1.2: {str_outout1[:]}")
-        print(f"RoI 2.2: {str_outout2[:]}")
+    #     str_outout2[0] = x_top 
+    #     str_outout2[1] = max1 - 24*Npixel
+    #     str_outout2[2] = x_top
+    #     str_outout2[3] = max1 
+    #     print(f"RoI 1.2: {str_outout1[:]}")
+    #     print(f"RoI 2.2: {str_outout2[:]}")
 
     else:
         str_outout1[0] = (x_top + x_bot)/2
@@ -587,7 +680,7 @@ def findRoi(str_x, Y, top, bot, Npixel):
             str_outout3[3] = max2 + 3*Npixel
 
 
-    goclech2 = goc_lech.degrees(goc_lech.atan2(abs(x_top2 - x_bot2),abs(max2 - min2)))
+    goclech2 = math.degrees(math.atan2(abs(x_top2 - x_bot2),abs(max2 - min2)))
     print(f"goc lech RoI 2:{goclech2}")
     if abs(max2 - min2) >= 45*Npixel and goclech2 <= 2  and str_[1] > 0 and all(x != 0 for x in str_outout2) :
         str_outout3[0] = (x_top2 + x_bot2)/2
@@ -720,7 +813,7 @@ def findRoi(str_x, Y, top, bot, Npixel):
 
         print(f"str_outout4[2] == j4: {str_outout4[:]}")
     
-    gocLech3 = goc_lech.degrees(goc_lech.atan2(abs(x_top3 - x_bot3),abs(max3 - min3)))
+    gocLech3 = math.degrees(math.atan2(abs(x_top3 - x_bot3),abs(max3 - min3)))
     print(f"goc lech RoI 2:{gocLech3}")
     if abs(max3 - min3) >= 45*Npixel and gocLech3 <= 2  and str_[2] > 0 and all(x != 0 for x in str_outout3) :
         str_outout3[0] = (x_top3 + x_bot3)/2
@@ -941,6 +1034,7 @@ def processBin(array2, values_y, row, threshold_code, input_var):
         else:
             so_sanh = 0
         mang_so_sanh[i] = so_sanh
+        
     # plt.plot(values_x, mang_so_sanh, color = 'blue')
     # plt.show() 
     print(f"values of mang so sanh: {mang_so_sanh[:]}")
@@ -1093,26 +1187,29 @@ def processBin(array2, values_y, row, threshold_code, input_var):
  
 
 
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\40cm_test2.jpeg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\test7.jpeg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\Led_tach_RoI.jpeg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID-cheo3.jpeg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_4LED_10_07.jpg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LEDID_4_RoI_adjusted.jpg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_long.jpeg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\3_led.jpg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID-8bit.jpeg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LEDID_3_RoI.jpeg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_newphone.png")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_02_2000Hz.jpg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\GN2200\\9.jpg")
-# img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\Led_long_cheo2.jpg")
-img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\zoom_pixel4.jpg")
-
-
-
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\40cm_test2.jpeg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\test7.jpeg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\Led_tach_RoI.jpeg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\LedID-cheo3.jpeg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\LedID_4LED_10_07.jpg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\LEDID_4_RoI_adjusted.jpg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\LedID_long.jpeg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\3_led.jpg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\LedID-8bit.jpeg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\LEDID_3_RoI.jpeg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\LedID_newphone.png")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\LedID_02_2000Hz.jpg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\GN2200\\9.jpg")
+img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\Led_long_cheo2.jpg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\zoom_pixel4.jpg")
+# img = cv2.imread("H:/python/sample/venv/app_proccessing_image/ban_on_dinh/led_image/Led_tach_RoI.jpeg")
+# img = cv2.imread("venv\\app_proccessing_image\\ban_on_dinh\\led_image\\matlab_org.jpg")
 
         
 # led1, led2, led3, led4 = process_frame(img)
-led1 = process_frame(img)
+before_process = before_process_frame(img)
+led1 = process_frame(before_process)
+
+# test = before_process_frame(img)
+
 # print(f"led1: {led1} and led2: {led2} and led3: {led3} and led4: {led4}")

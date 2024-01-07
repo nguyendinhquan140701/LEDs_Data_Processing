@@ -869,7 +869,7 @@ def xu_ly_y(array2, values_y, row, threshold_code, input_var):
 
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\Test7_2_RoI.jpg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\40cm_tes1.jpeg")
-img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID-cheo3.jpeg")
+img = cv2.imread("venv/app_proccessing_image/ban_on_dinh/1. doc pixel/LedID-cheo3.jpeg")
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\2led.png")
 
 # img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\LedID_Ngang_newest.jpg")

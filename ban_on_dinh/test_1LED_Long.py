@@ -11,11 +11,6 @@ import time
 # import ham_xu_ly_y_4 as xly
 
 
-
-# vid = cv2.VideoCapture(0)
-# vid.set(cv2.CAP_PROP_EXPOSURE, -13)
-# vid.set(3, 640)
-# vid.set(4, 480)
 array2 = [[0]]
 aa = 0
 def process_frame(img):
@@ -745,30 +740,7 @@ def check_roi_tu_arr(str_x, Y, top, bot, Npixel):
         str_outout4[3] = max4
         print(f"str_outout4[3] == j4: {str_outout4[:]}")
     
-    gocLech = goc_lech.degrees(goc_lech.atan2(abs(x_top4 - x_bot4),abs(max4 - min4)))
-    # print(f"goc lech RoI:{gocLech}")
-    # if abs(max4 - min4) >= 50*Npixel and gocLech <= 2 and max4 > 0 :
-    #     str_outout4[0] = (x_top4 + x_bot4)/2
-    #     str_outout4[1] = min4
-    #     str_outout4[2] = (x_top4 + x_bot4)/2
-    #     str_outout4[3] = min4 + 20*Npixel
-
-    #     str_outout4[0] = (x_top4 + x_bot4)/2
-    #     str_outout4[1] = max4 - 20*Npixel
-    #     str_outout4[2] = (x_top4 + x_bot4)/2
-    #     str_outout4[3] = max4
     
-    # elif abs(max4 - min4) >= 50*Npixel and gocLech > 2 and max4 > 0 :
-    #     str_outout4[0] = x_bot4
-    #     str_outout4[1] = min4
-    #     str_outout4[2] = x_bot4
-    #     str_outout4[3] = min4 + 20*Npixel
-
-
-    #     str_outout4[0] = x_top4
-    #     str_outout4[1] = max4 - 20*Npixel
-    #     str_outout4[2] = x_top4
-    #     str_outout4[3] = max4
     print(f"str_outout2 in 4 RoI:{str_outout2}")
     print(f"toa do RoI4 ham 4 RoI: {str_outout4[:]}")
 

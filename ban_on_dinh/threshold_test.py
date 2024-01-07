@@ -77,5 +77,5 @@ def threshold(img):
     cv2.destroyAllWindows()
 
 
-img = cv2.imread("C:\\Python\\sample\\venv\\app_proccessing_image\\ban_on_dinh\\1. doc pixel\\40cm_test2.jpeg")
+img = cv2.imread("ban_on_dinh/40cm_test2.jpeg")
 threshold(img)
