@@ -1,4 +1,0 @@
-opencv đọc bgr
-
-OpenCV reads in images in BGR format (instead of RGB) because when OpenCV was first being developed, 
-BGR color format was popular among camera manufacturers and image software providers.
