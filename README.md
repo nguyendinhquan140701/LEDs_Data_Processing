@@ -1,2 +1,2 @@
-# app_proccessing_image
- DATN_2023
+# Decode data from LED bulbs in Optical Camera Communication system
+
