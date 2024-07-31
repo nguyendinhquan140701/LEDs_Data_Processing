@@ -7,7 +7,7 @@ import math
 import sys
 sys.path.append('E:\Project\OOC\LEDs_Data_Processing\LED_Decode')
 
-class test_Dong:
+class test_Chuan:
     def __init__(self):
 
         self.image = cv2.imread('E:\Project\OOC\LEDs_Data_Processing\LED_Decode\led_image\\40cm_test2.jpeg')
@@ -72,5 +72,5 @@ class test_Dong:
             print("Error")
 
 if __name__ == "__main__":
-    test = test_Dong()
+    test = test_Chuan()
     test.process_frame(20, 0.1, 0, 0, 0)
